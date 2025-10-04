@@ -1,0 +1,67 @@
+Part 0 (A): Preparation: get RottenPotatoes running locally
+GitHub setup
+As in previous CHIPS, you will need to authenticate git with GitHub to clone the repository for this assignment. The clone URL below will require that you use public key authentication.
+git clone git@github.com:cs169/fa23-YOUR_GITHUB_USERNAME-chips-5.3.git rottenpotatoes-rails-intro
+cd rottenpotatoes-rails-intro
+Since this repository isn’t shared with your team, you can push directly to the main branch. Still, it’s a good habit to get into the practice of making a branch for changes you want to make, so you can later create a pull request before merging into main (which gives you the power to document your sets of commits thoroughly).
+A good name for this branch would be something like add-filtering, which is descriptive of the feature you’ll be adding in the next part of this assignment. You’re also welcome to continue to choose a pair programming partner in your team for this CHIPS, in which case you should pick a repository to use between the two of you and add the other member as a collaborator to the repository. If you work in a pair, you should add both team members’ GitHub usernames to the branch name so we can more easily see who worked with whom.
+git checkout -b <BRANCH_NAME>
+git push -u origin <BRANCH_NAME>
+You will now have a local branch to make edits that is connected to an identically named remote branch on the GitHub repo to which you should push frequently using the following commands:
+git status # review your changes
+git add [...] # you will need to include your own files!
+git commit -m "your message here"
+git push origin
+Whenever you start working on a Rails project, the first thing you should do is to run Bundler, to make sure all the app’s gems are installed. Switch to the app’s root directory (presumably rottenpotatoes-rails-intro) and run bundle config set without 'production' (you only need to specify without 'production' the first time, as this setting will be remembered on future runs of Bundler for this project).
+Finally, run the initial migration, which (since it’s the very first migration) will also create the database itself:
+bundle exec rake db:migrate
+You can probably get away with just running rake db:migrate directly, but starting with your commands with bundle exec asks bundler to run the command in the context of the dependencies specified in the current app’s Gemfile (rather than potentially pulling in a version of rake installed globally on the server you’re using, which can cause dependency headaches down the line). It’s a good havit to get into.
+Self Check Question: How does Rails decide where and how to create the development database? (Hint: check the db and config subdirectories)
+
+Self Check Question: What tables got created by the migrations?
+
+Now insert “seed data” into the database. (Seeds are initial data items that the app needs to run):
+bundle exec rake db:seed
+Self Check Question: What seed data was inserted and where was it specified? (Hint: rake -T db:seed explains the seed task; rake -T explains other available Rake tasks)
+
+At this point you should be able to run the app locally and visit it from a browser to make sure it’s working before you go on.
+Follow the instructions below to run and preview a Rails app locally – the steps are a bit different depending on whether you’re using Codio.
+If developing in Codio
+You can click the Box URL button like in previous CHIPS. If you want to do it manually, you can obtain your Codio subdomain name by going into any Codio terminal window and saying hostname. Your subdomain will be a pair of random words–in this example we’ll pretend it’s luminous-coconut.
+Start the app in a terminal: bundle exec rails server -b 0.0.0.0 (again, bundle exec probably isn’t necessary, but it’s good to use it anyway!)
+Open a regular browser window to luminous-coconut-3000.codio.io to visit the app’s home page
+If developing Locally
+If you’re developing locally, the steps would instead be these:
+Start the app in a terminal: bundle exec rails server (omit -b 0.0.0.0)
+Open a regular browser window to localhost:3000/ to visit the app’s home page (note the :3000 rather than -3000)
+Next
+Part 0 (B): Preparation: deploy to Heroku
+Initial Heroku Deployment
+Log in to your Heroku account by typing the command: heroku login -i in the terminal. Provide your berkeley.edu (or approved alternative) email but when it asks for a password, instead you must find your API Key from the bottom of the Account Settings page on Heroku. Copy and paste this value in for the password.
+For CHIPS 5.3, you will need to complete the Heroku deployment to your own individual Heroku app, not your team app. Even if you are pair programming, you should complete a deployment on your own. We have created a Heroku app for you based on your email address, and it can be found by running the heroku apps command in your shell:
+heroku apps -t esaas # "esaas" is the name of the Heroku team your app is in
+Find the name of your personal app, then use it in the commands below. We’ll add Heroku to your git repo as a remote named heroku, as we have done in the past, so you can deploy to the app.
+heroku apps:favorites:add -a <HEROKU_APP_NAME>
+heroku git:remote -a <HEROKU_APP_NAME>
+A “stack” is a term that describes the operating system and default software that you application is running on. Heroku has a large set of stacks you can select from. In this case, heroku-24 includes the right versions of rails.
+If you haven’t yet made a commit to your new branch, do that now (you probably have a change in the db folder):
+git status # make sure you're on your new branch
+git add [..] # stage the updated files
+git commit -m [..] # write a message
+Now, push your current branch to the Heroku remote’s main branch:
+git push heroku <YOUR_BRANCH>:main
+(You may see the following warning the first time - it’s fine. Answer "yes", and in the future you shouldn’t see it anymore:)
+The authenticity of host 'heroku.com (50.19.85.132)' can't be established.
+RSA key fingerprint is 8b:48:5e:67:0e:c9:16:47:32:f2:87:0c:1f:c8:60:ad.
+Are you sure you want to continue connecting (yes/no)?
+Please type 'yes' or 'no':
+Is the app running on Heroku? If you navigate to the heroku URL that is printed above the blue text at the end of the results from git push heroku master you’ll get a “We’re sorry, but something went wrong.” error in the browser.
+As with the previous assignment "Hello Rails", heroku logs tell us that the movies table doesn’t exist. So, as before, run the initial migration and import the seed data:
+heroku run bundle exec rake db:migrate
+heroku run bundle exec rake db:seed
+Since you’re starting from a fresh Heroku app, the deployment should have detected your Postgres dependency and added the Postgres addon for you. If not, though, you’ll get an error from the rake commands, and you should attach the addon manually:
+heroku addons -a <HEROKU_APP_NAME> # make sure the postgres addon doesn't already exist
+heroku addons:create heroku-postgresql -a <HEROKU_APP_NAME> # if necessary
+Now you should be able to navigate to your app’s URL.
+Note: don’t proceed past this point until you are able to complete the above successfully, or you won’t be able to receive a grade for this assignment!
+Next
