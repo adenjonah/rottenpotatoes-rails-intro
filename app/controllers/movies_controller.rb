@@ -7,7 +7,35 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @all_ratings = Movie.all_ratings
+    
+    # Part 3: Check if we're coming from params or need to use session
+    if params[:ratings].present? || params[:sort_by].present?
+      # User explicitly provided filter/sort params
+      session[:ratings] = params[:ratings]
+      session[:sort_by] = params[:sort_by]
+    elsif session[:ratings].nil? && session[:sort_by].nil?
+      # First visit - default to all ratings checked
+      session[:ratings] = Hash[@all_ratings.map { |rating| [rating, "1"] }]
+    end
+    
+    # Determine which ratings to show
+    if session[:ratings].present?
+      @ratings_to_show = session[:ratings].keys
+    else
+      @ratings_to_show = @all_ratings
+    end
+    
+    # Get the sort column
+    @sort_by = session[:sort_by]
+    
+    # Query movies with filtering
+    @movies = Movie.with_ratings(@ratings_to_show)
+    
+    # Apply sorting if specified
+    if @sort_by.present? && ['title', 'release_date'].include?(@sort_by)
+      @movies = @movies.order(@sort_by)
+    end
   end
 
   def new
